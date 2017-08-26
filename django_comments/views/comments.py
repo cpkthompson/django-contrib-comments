@@ -106,7 +106,14 @@ def post_comment(request, next=None, using=None):
 
     # Otherwise create the comment
     comment = form.get_comment_object(site_id=get_current_site(request).id)
-    comment.ip_address = request.META.get("REMOTE_ADDR", None) or None
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR', None)
+
+    comment.ip_address = ip
+    
     if user_is_authenticated:
         comment.user = request.user
 
